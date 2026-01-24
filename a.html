@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotation Generator with PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+
+            .page {
+                page-break-after: always;
+                margin: 0;
+                border: none;
+                box-shadow: none;
+                padding: 0;
+            }
+
+            body {
+                background-color: white;
+            }
+            
+            /* Ensure inputs print correctly */
+            input {
+                border: none !important;
+                border-bottom: 1px solid #000 !important;
+            }
+        }
+
+        .page {
+            max-width: 800px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            padding: 40px; /* Increased padding for better look */
+            box-sizing: border-box;
+            background: white;
+            min-height: 29.7cm; /* A4 height approx */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .red-text {
+            color: red;
+        }
+
+        .times-font {
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: bold;
+        }
+        
+        /* Typography for input and editable areas */
+        .editable-text {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 18px;
+        }
+
+        .header-section p {
+            margin: 5px 0;
+        }
+
+        .quotation-details {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: baseline;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        th {
+            background-color: #f9f9f9;
+        }
+        
+        /* Editable Table Cells */
+        td[contenteditable="true"] {
+            text-align: left;
+            background-color: #fff; /* White background for editing */
+            cursor: text;
+            word-break: break-word; /* Prevents overflow with long words */
+        }
+        
+        td[contenteditable="true"]:focus {
+            outline: none; /* Removes the blue browser focus border */
+            background-color: #fdfdfd; /* Subtle change to indicate focus if needed, or keep white */
+        }
+        
+        td[contenteditable="true"]:empty:before {
+            content: "\00a0"; /* Non-breaking space to keep cell height */
+            display: inline-block;
+        }
+
+        /* Name Input Styling */
+        .name-input {
+            flex: 1;
+            border: none;
+            border-bottom: 1px solid #000;
+            outline: none;
+            font-size: 18px;
+            font-family: 'Times New Roman', Times, serif;
+            margin-left: 10px;
+            background: transparent;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="no-print" style="text-align: center; padding: 20px;">
+        <button onclick="window.print()"
+            style="padding: 12px 24px; font-size: 18px; background: #007BFF; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold;">Print / Save as PDF</button>
+        <p style="margin-top: 10px; color: #666;">Instructions: Type directly into the Name field and the table rows below. When finished, click the button above.</p>
+    </div>
+
+    <!-- Script to generate 10 identical pages -->
+    <script>
+        const pagesContainer = document.body;
+        
+        const pageTemplate = `
+    <div class="page">
+        <header style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px;"
+            class="text-center header-section">
+            <h1 class="red-text times-font" style="font-size: 28px; margin-bottom: 10px;">MAHAKAL PRODUCTION</h1>
+            <p class="times-font" style="font-size: 14px;">KRISHNA MALL, ROXY TALKIES, NEAR ROXY PULL, 1ST FLOOR, SHOP NO. 120, LASHKAR, GWALIOR</p>
+            <p class="times-font" style="font-size: 14px;">MOBILE NO: 6269886524, 9201190091</p>
+            <p class="times-font" style="font-size: 14px;">EMAIL: mahakalproduction@gmail.com</p>
+            <div style="margin-top: 15px; border: 1px solid #000; display: inline-block; padding: 5px 20px;">
+                <span class="times-font" style="font-size: 20px;">QUOTATION</span>
+            </div>
+        </header>
+
+        <div class="quotation-details">
+            <span class="times-font" style="font-size: 18px;">Name: </span>
+            <input type="text" class="name-input" placeholder="">
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 60px;" class="times-font">S.No.</th>
+                    <th class="times-font">Particulars</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${Array.from({length: 10}, (_, i) => `
+                <tr>
+                    <td class="times-font">${i + 1}</td>
+                    <td contenteditable="true" class="editable-text" style="height: 24px;"></td>
+                </tr>
+                `).join('')}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td class="times-font" style="text-align: center;">Total</td>
+                    <td contenteditable="true" class="editable-text" style="text-align: right; font-weight: bold;"></td>
+                </tr>
+            </tfoot>
+        </table>
+        
+        <!-- Optional Footer Space -->
+        <div style="margin-top: 40px; display: flex; justify-content: space-between;">
+             <div class="times-font" style="font-size: 14px;">Authorized Signatory</div>
+        </div>
+    </div>
+        `;
+
+        // Render 10 pages
+        // We already have the container. We will use document.write or innerHTML logic strictly if we were inside the body tag directly, 
+        // but here let's just append the HTML repetitive string to a container div or just list them.
+        
+        // However, since I am writing the Full HTML file via the tool, I will just loop string construction here in the code block 
+        // effectively hardcoding the 10 pages to ensure it's a static file without needing JS execution at runtime for layout (better for some PDF converters).
+    </script>
+    
+    <!-- Page 1 -->
+    <div class="page">
+        <header style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px;" class="text-center header-section">
+            <h1 class="red-text times-font" style="font-size: 28px; margin-bottom: 10px;">MAHAKAL PRODUCTION</h1>
+            <p class="times-font" style="font-size: 14px;">KRISHNA MALL, ROXY TALKIES, NEAR ROXY PULL, 1ST FLOOR, SHOP NO. 120, LASHKAR, GWALIOR</p>
+            <p class="times-font" style="font-size: 14px;">MOBILE NO: 6269886524, 9201190091</p>
+            <p class="times-font" style="font-size: 14px;">EMAIL: mahakalproduction@gmail.com</p>
+            <div style="margin-top: 15px; border: 1px solid #000; display: inline-block; padding: 5px 20px;">
+                <span class="times-font" style="font-size: 20px;">QUOTATION</span>
+            </div>
+        </header>
+        <div class="quotation-details">
+            <span class="times-font" style="font-size: 18px;">Name: </span>
+            <input type="text" class="name-input">
+        </div>
+        <table>
+            <thead>
+                <tr><th style="width: 60px;" class="times-font">S.No.</th><th class="times-font">Particulars</th></tr>
+            </thead>
+            <tbody>
+                <tr><td class="times-font">1</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">2</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">3</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">4</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">5</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">6</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">7</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">8</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">9</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">10</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+            </tbody>
+            <tfoot>
+                <tr><td class="times-font" style="text-align: center;">Total</td><td contenteditable="true" class="editable-text" style="text-align: right; font-weight: bold;"></td></tr>
+            </tfoot>
+        </table>
+
+    </div>
+
+    <!-- Repeating Page Structure for Pages 2-10 -->
+    <!-- I will generate these blocks now -->
+    
+    <div class="page">
+        <header style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px;" class="text-center header-section">
+            <h1 class="red-text times-font" style="font-size: 28px; margin-bottom: 10px;">MAHAKAL PRODUCTION</h1>
+            <p class="times-font" style="font-size: 14px;">KRISHNA MALL, ROXY TALKIES, NEAR ROXY PULL, 1ST FLOOR, SHOP NO. 120, LASHKAR, GWALIOR</p>
+            <p class="times-font" style="font-size: 14px;">MOBILE NO: 6269886524, 9201190091</p>
+            <p class="times-font" style="font-size: 14px;">EMAIL: mahakalproduction@gmail.com</p>
+            <div style="margin-top: 15px; border: 1px solid #000; display: inline-block; padding: 5px 20px;">
+                <span class="times-font" style="font-size: 20px;">QUOTATION</span>
+            </div>
+        </header>
+        <div class="quotation-details">
+            <span class="times-font" style="font-size: 18px;">Name: </span>
+            <input type="text" class="name-input">
+        </div>
+        <table>
+            <thead><tr><th style="width: 60px;" class="times-font">S.No.</th><th class="times-font">Particulars</th></tr></thead>
+            <tbody>
+                <tr><td class="times-font">1</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">2</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">3</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">4</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">5</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">6</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">7</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">8</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">9</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">10</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+            </tbody>
+            <tfoot><tr><td class="times-font" style="text-align: center;">Total</td><td contenteditable="true" class="editable-text" style="text-align: right; font-weight: bold;"></td></tr></tfoot>
+        </table>
+        <div style="margin-top: 40px; display: flex; justify-content: flex-end;">
+             <div class="times-font" style="font-size: 14px; border-top: 1px solid #000; padding-top: 5px; width: 200px; text-align: center;">Authorized Signatory</div>
+        </div>
+    </div>
+    
+    <div class="page">
+        <header style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px;" class="text-center header-section">
+            <h1 class="red-text times-font" style="font-size: 28px; margin-bottom: 10px;">MAHAKAL PRODUCTION</h1>
+            <p class="times-font" style="font-size: 14px;">KRISHNA MALL, ROXY TALKIES, NEAR ROXY PULL, 1ST FLOOR, SHOP NO. 120, LASHKAR, GWALIOR</p>
+            <p class="times-font" style="font-size: 14px;">MOBILE NO: 6269886524, 9201190091</p>
+            <p class="times-font" style="font-size: 14px;">EMAIL: mahakalproduction@gmail.com</p>
+            <div style="margin-top: 15px; border: 1px solid #000; display: inline-block; padding: 5px 20px;">
+                <span class="times-font" style="font-size: 20px;">QUOTATION</span>
+            </div>
+        </header>
+        <div class="quotation-details">
+            <span class="times-font" style="font-size: 18px;">Name: </span>
+            <input type="text" class="name-input">
+        </div>
+        <table>
+            <thead><tr><th style="width: 60px;" class="times-font">S.No.</th><th class="times-font">Particulars</th></tr></thead>
+            <tbody>
+                <tr><td class="times-font">1</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">2</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">3</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">4</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">5</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">6</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">7</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">8</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">9</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">10</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+            </tbody>
+            <tfoot><tr><td class="times-font" style="text-align: center;">Total</td><td contenteditable="true" class="editable-text" style="text-align: right; font-weight: bold;"></td></tr></tfoot>
+        </table>
+        <div style="margin-top: 40px; display: flex; justify-content: flex-end;">
+             <div class="times-font" style="font-size: 14px; border-top: 1px solid #000; padding-top: 5px; width: 200px; text-align: center;">Authorized Signatory</div>
+        </div>
+    </div>
+
+    <!-- Page 4 -->
+    <div class="page">
+        <header style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px;" class="text-center header-section">
+            <h1 class="red-text times-font" style="font-size: 28px; margin-bottom: 10px;">MAHAKAL PRODUCTION</h1>
+            <p class="times-font" style="font-size: 14px;">KRISHNA MALL, ROXY TALKIES, NEAR ROXY PULL, 1ST FLOOR, SHOP NO. 120, LASHKAR, GWALIOR</p>
+            <p class="times-font" style="font-size: 14px;">MOBILE NO: 6269886524, 9201190091</p>
+            <p class="times-font" style="font-size: 14px;">EMAIL: mahakalproduction@gmail.com</p>
+            <div style="margin-top: 15px; border: 1px solid #000; display: inline-block; padding: 5px 20px;">
+                <span class="times-font" style="font-size: 20px;">QUOTATION</span>
+            </div>
+        </header>
+        <div class="quotation-details">
+            <span class="times-font" style="font-size: 18px;">Name: </span>
+            <input type="text" class="name-input">
+        </div>
+        <table>
+            <thead><tr><th style="width: 60px;" class="times-font">S.No.</th><th class="times-font">Particulars</th></tr></thead>
+            <tbody>
+                <tr><td class="times-font">1</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">2</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">3</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">4</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">5</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">6</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">7</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">8</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">9</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">10</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+            </tbody>
+            <tfoot><tr><td class="times-font" style="text-align: center;">Total</td><td contenteditable="true" class="editable-text" style="text-align: right; font-weight: bold;"></td></tr></tfoot>
+        </table>
+        <div style="margin-top: 40px; display: flex; justify-content: flex-end;">
+             <div class="times-font" style="font-size: 14px; border-top: 1px solid #000; padding-top: 5px; width: 200px; text-align: center;">Authorized Signatory</div>
+        </div>
+    </div>
+    
+    <!-- Page 5 -->
+    <div class="page">
+        <header style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px;" class="text-center header-section">
+            <h1 class="red-text times-font" style="font-size: 28px; margin-bottom: 10px;">MAHAKAL PRODUCTION</h1>
+            <p class="times-font" style="font-size: 14px;">KRISHNA MALL, ROXY TALKIES, NEAR ROXY PULL, 1ST FLOOR, SHOP NO. 120, LASHKAR, GWALIOR</p>
+            <p class="times-font" style="font-size: 14px;">MOBILE NO: 6269886524, 9201190091</p>
+            <p class="times-font" style="font-size: 14px;">EMAIL: mahakalproduction@gmail.com</p>
+            <div style="margin-top: 15px; border: 1px solid #000; display: inline-block; padding: 5px 20px;">
+                <span class="times-font" style="font-size: 20px;">QUOTATION</span>
+            </div>
+        </header>
+        <div class="quotation-details">
+            <span class="times-font" style="font-size: 18px;">Name: </span>
+            <input type="text" class="name-input">
+        </div>
+        <table>
+            <thead><tr><th style="width: 60px;" class="times-font">S.No.</th><th class="times-font">Particulars</th></tr></thead>
+            <tbody>
+                <tr><td class="times-font">1</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">2</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">3</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">4</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">5</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">6</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">7</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">8</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">9</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">10</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+            </tbody>
+            <tfoot><tr><td class="times-font" style="text-align: center;">Total</td><td contenteditable="true" class="editable-text" style="text-align: right; font-weight: bold;"></td></tr></tfoot>
+        </table>
+        <div style="margin-top: 40px; display: flex; justify-content: flex-end;">
+             <div class="times-font" style="font-size: 14px; border-top: 1px solid #000; padding-top: 5px; width: 200px; text-align: center;">Authorized Signatory</div>
+        </div>
+    </div>
+    
+    <!-- Page 6 -->
+    <div class="page">
+        <header style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px;" class="text-center header-section">
+            <h1 class="red-text times-font" style="font-size: 28px; margin-bottom: 10px;">MAHAKAL PRODUCTION</h1>
+            <p class="times-font" style="font-size: 14px;">KRISHNA MALL, ROXY TALKIES, NEAR ROXY PULL, 1ST FLOOR, SHOP NO. 120, LASHKAR, GWALIOR</p>
+            <p class="times-font" style="font-size: 14px;">MOBILE NO: 6269886524, 9201190091</p>
+            <p class="times-font" style="font-size: 14px;">EMAIL: mahakalproduction@gmail.com</p>
+            <div style="margin-top: 15px; border: 1px solid #000; display: inline-block; padding: 5px 20px;">
+                <span class="times-font" style="font-size: 20px;">QUOTATION</span>
+            </div>
+        </header>
+        <div class="quotation-details">
+            <span class="times-font" style="font-size: 18px;">Name: </span>
+            <input type="text" class="name-input">
+        </div>
+        <table>
+            <thead><tr><th style="width: 60px;" class="times-font">S.No.</th><th class="times-font">Particulars</th></tr></thead>
+            <tbody>
+                <tr><td class="times-font">1</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">2</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">3</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">4</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">5</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">6</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">7</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">8</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">9</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">10</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+            </tbody>
+            <tfoot><tr><td class="times-font" style="text-align: center;">Total</td><td contenteditable="true" class="editable-text" style="text-align: right; font-weight: bold;"></td></tr></tfoot>
+        </table>
+        <div style="margin-top: 40px; display: flex; justify-content: flex-end;">
+             <div class="times-font" style="font-size: 14px; border-top: 1px solid #000; padding-top: 5px; width: 200px; text-align: center;">Authorized Signatory</div>
+        </div>
+    </div>
+    
+    <!-- Page 7 -->
+    <div class="page">
+        <header style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px;" class="text-center header-section">
+            <h1 class="red-text times-font" style="font-size: 28px; margin-bottom: 10px;">MAHAKAL PRODUCTION</h1>
+            <p class="times-font" style="font-size: 14px;">KRISHNA MALL, ROXY TALKIES, NEAR ROXY PULL, 1ST FLOOR, SHOP NO. 120, LASHKAR, GWALIOR</p>
+            <p class="times-font" style="font-size: 14px;">MOBILE NO: 6269886524, 9201190091</p>
+            <p class="times-font" style="font-size: 14px;">EMAIL: mahakalproduction@gmail.com</p>
+            <div style="margin-top: 15px; border: 1px solid #000; display: inline-block; padding: 5px 20px;">
+                <span class="times-font" style="font-size: 20px;">QUOTATION</span>
+            </div>
+        </header>
+        <div class="quotation-details">
+            <span class="times-font" style="font-size: 18px;">Name: </span>
+            <input type="text" class="name-input">
+        </div>
+        <table>
+            <thead><tr><th style="width: 60px;" class="times-font">S.No.</th><th class="times-font">Particulars</th></tr></thead>
+            <tbody>
+                 <tr><td class="times-font">1</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">2</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">3</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">4</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">5</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">6</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">7</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">8</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">9</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">10</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+            </tbody>
+            <tfoot><tr><td class="times-font" style="text-align: center;">Total</td><td contenteditable="true" class="editable-text" style="text-align: right; font-weight: bold;"></td></tr></tfoot>
+        </table>
+        <div style="margin-top: 40px; display: flex; justify-content: flex-end;">
+             <div class="times-font" style="font-size: 14px; border-top: 1px solid #000; padding-top: 5px; width: 200px; text-align: center;">Authorized Signatory</div>
+        </div>
+    </div>
+    
+    <!-- Page 8 -->
+    <div class="page">
+        <header style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px;" class="text-center header-section">
+            <h1 class="red-text times-font" style="font-size: 28px; margin-bottom: 10px;">MAHAKAL PRODUCTION</h1>
+            <p class="times-font" style="font-size: 14px;">KRISHNA MALL, ROXY TALKIES, NEAR ROXY PULL, 1ST FLOOR, SHOP NO. 120, LASHKAR, GWALIOR</p>
+            <p class="times-font" style="font-size: 14px;">MOBILE NO: 6269886524, 9201190091</p>
+            <p class="times-font" style="font-size: 14px;">EMAIL: mahakalproduction@gmail.com</p>
+            <div style="margin-top: 15px; border: 1px solid #000; display: inline-block; padding: 5px 20px;">
+                <span class="times-font" style="font-size: 20px;">QUOTATION</span>
+            </div>
+        </header>
+        <div class="quotation-details">
+            <span class="times-font" style="font-size: 18px;">Name: </span>
+            <input type="text" class="name-input">
+        </div>
+        <table>
+            <thead><tr><th style="width: 60px;" class="times-font">S.No.</th><th class="times-font">Particulars</th></tr></thead>
+            <tbody>
+                 <tr><td class="times-font">1</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">2</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">3</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">4</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">5</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">6</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">7</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">8</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">9</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">10</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+            </tbody>
+            <tfoot><tr><td class="times-font" style="text-align: center;">Total</td><td contenteditable="true" class="editable-text" style="text-align: right; font-weight: bold;"></td></tr></tfoot>
+        </table>
+        <div style="margin-top: 40px; display: flex; justify-content: flex-end;">
+             <div class="times-font" style="font-size: 14px; border-top: 1px solid #000; padding-top: 5px; width: 200px; text-align: center;">Authorized Signatory</div>
+        </div>
+    </div>
+    
+    <!-- Page 9 -->
+    <div class="page">
+        <header style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px;" class="text-center header-section">
+            <h1 class="red-text times-font" style="font-size: 28px; margin-bottom: 10px;">MAHAKAL PRODUCTION</h1>
+            <p class="times-font" style="font-size: 14px;">KRISHNA MALL, ROXY TALKIES, NEAR ROXY PULL, 1ST FLOOR, SHOP NO. 120, LASHKAR, GWALIOR</p>
+            <p class="times-font" style="font-size: 14px;">MOBILE NO: 6269886524, 9201190091</p>
+            <p class="times-font" style="font-size: 14px;">EMAIL: mahakalproduction@gmail.com</p>
+            <div style="margin-top: 15px; border: 1px solid #000; display: inline-block; padding: 5px 20px;">
+                <span class="times-font" style="font-size: 20px;">QUOTATION</span>
+            </div>
+        </header>
+        <div class="quotation-details">
+            <span class="times-font" style="font-size: 18px;">Name: </span>
+            <input type="text" class="name-input">
+        </div>
+        <table>
+            <thead><tr><th style="width: 60px;" class="times-font">S.No.</th><th class="times-font">Particulars</th></tr></thead>
+            <tbody>
+                 <tr><td class="times-font">1</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">2</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">3</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">4</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">5</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">6</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">7</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">8</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">9</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">10</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+            </tbody>
+            <tfoot><tr><td class="times-font" style="text-align: center;">Total</td><td contenteditable="true" class="editable-text" style="text-align: right; font-weight: bold;"></td></tr></tfoot>
+        </table>
+        <div style="margin-top: 40px; display: flex; justify-content: flex-end;">
+             <div class="times-font" style="font-size: 14px; border-top: 1px solid #000; padding-top: 5px; width: 200px; text-align: center;">Authorized Signatory</div>
+        </div>
+    </div>
+    
+    <!-- Page 10 -->
+    <div class="page">
+        <header style="border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px;" class="text-center header-section">
+            <h1 class="red-text times-font" style="font-size: 28px; margin-bottom: 10px;">MAHAKAL PRODUCTION</h1>
+            <p class="times-font" style="font-size: 14px;">KRISHNA MALL, ROXY TALKIES, NEAR ROXY PULL, 1ST FLOOR, SHOP NO. 120, LASHKAR, GWALIOR</p>
+            <p class="times-font" style="font-size: 14px;">MOBILE NO: 6269886524, 9201190091</p>
+            <p class="times-font" style="font-size: 14px;">EMAIL: mahakalproduction@gmail.com</p>
+            <div style="margin-top: 15px; border: 1px solid #000; display: inline-block; padding: 5px 20px;">
+                <span class="times-font" style="font-size: 20px;">QUOTATION</span>
+            </div>
+        </header>
+        <div class="quotation-details">
+            <span class="times-font" style="font-size: 18px;">Name: </span>
+            <input type="text" class="name-input">
+        </div>
+        <table>
+            <thead><tr><th style="width: 60px;" class="times-font">S.No.</th><th class="times-font">Particulars</th></tr></thead>
+            <tbody>
+                 <tr><td class="times-font">1</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">2</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">3</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">4</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">5</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">6</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">7</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">8</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">9</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+                <tr><td class="times-font">10</td><td contenteditable="true" class="editable-text" style="height: 24px;"></td></tr>
+            </tbody>
+            <tfoot><tr><td class="times-font" style="text-align: center;">Total</td><td contenteditable="true" class="editable-text" style="text-align: right; font-weight: bold;"></td></tr></tfoot>
+        </table>
+        <div style="margin-top: 40px; display: flex; justify-content: flex-end;">
+             <div class="times-font" style="font-size: 14px; border-top: 1px solid #000; padding-top: 5px; width: 200px; text-align: center;">Authorized Signatory</div>
+        </div>
+    </div>
+</body>
+</html>
